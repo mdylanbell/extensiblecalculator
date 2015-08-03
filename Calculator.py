@@ -56,10 +56,10 @@ class Calculator(object):
 
     def __init__(self):
         self.operations_dict = {
-            '*': Calculator.multiply,
-            '/': Calculator.divide,
-            '+': Calculator.add,
-            '-': Calculator.subtract
+            '*': self.multiply,
+            '/': self.divide,
+            '+': self.add,
+            '-': self.subtract
         }
 
         self.order_of_operations = ['*', '/', '+', '-']
