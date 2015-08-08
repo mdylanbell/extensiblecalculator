@@ -2,64 +2,140 @@
 """
 
 import re
-import sys
 
 
 class Calculator(object):
     """ Calculator class to perform calculations on expressions
     """
 
-    def calculate(self, input):
+    operators = []
+
+    def calculate(self, expression):
         """ Perform calculation (not worrying about parentheses) on expression
             of arbitrary length, respecting order of operations
         """
 
-        expressions = re.split(',', input)
-        results = []
+        for operator in self._get_order_of_operations_symbols():
+            # Look for 2 numbers sepearated by our operator,
+            # capture the numbers (operands) before and after
+            # operator
+            regex = r'(\d+)\s*' + re.escape(operator) + r'\s*(\d+)'
 
-        for expression in expressions:
+            match = re.search(regex, expression)
 
-            for operator in self.order_of_operations:
-                regex = r'(\d+)\s*' + re.escape(operator) + r'\s*(\d+)'
+            while match:
 
-                m = re.search(regex, expression)
+                operand_a = int(match.group(1))
+                operand_b = int(match.group(2))
 
-                while m:
+                value = self._operate(operator, operand_a, operand_b)
 
-                    a = int(m.group(1))
-                    b = int(m.group(2))
+                # Replace the single operation we just performed with the
+                # result value, reducing expression
 
-                    value = self.operations_dict[operator](a, b)
-                    expression = re.sub(regex, str(value), expression, 1)
+                expression = re.sub(regex, str(value), expression, 1)
 
-                    m = re.search(regex, expression)
+                match = re.search(regex, expression)
 
-            results.append(int(expression))
+        return int(expression)
 
-        return results
-
-    @classmethod
     def add(self, a, b):
+        """ Returns result of simple addition (a + b)
+        """
         return a + b
 
-    @classmethod
     def subtract(self, a, b):
+        """ Returns result of simple subtraction (a - b)
+        """
         return a - b
 
-    @classmethod
     def multiply(self, a, b):
+        """ Returns result of simple multiplication (a * b)
+        """
         return a * b
 
-    @classmethod
     def divide(self, a, b):
+        """ Returns result of simple division (a / b)
+        """
         return a / b
 
     def __init__(self):
-        self.operations_dict = {
-            '*': self.multiply,
-            '/': self.divide,
-            '+': self.add,
-            '-': self.subtract
-        }
+        operators = [
+            {
+                'symbol': '*',
+                'method': self.multiply
+            },
+            {
+                'symbol': '/',
+                'method': self.divide
+            },
+            {
+                'symbol': '+',
+                'method': self.add
+            },
+            {
+                'symbol': '-',
+                'method': self.subtract
+            }
+        ]
 
-        self.order_of_operations = ['*', '/', '+', '-']
+        for operator in operators:
+            self._add_operator(operator['symbol'], operator['method'])
+
+    def _operate(self, symbol, operand_a, operand_b):
+        """ Perform single calculation based on an operator, and 2 operands
+        """
+        operator = self._get_operator_by_symbol(symbol)
+        method = operator['method']
+
+        return method(operand_a, operand_b)
+
+    def _get_operator_by_symbol(self, symbol):
+        """ Internal-use / private method to return an operator entry based on
+            symbol
+        """
+        for operator in self.operators:
+            if operator['symbol'] == symbol:
+                return operator
+
+        return None
+
+    def _add_operator(self, symbol, method):
+        """ Add operator to operator list.  Operators are defined by a symbol
+            (e.g. '*', '/'), and a corresponding handler function.
+
+            Each symbol can only be used once, so this method will overwrite
+            earlier operator definitions using the same symbol.
+        """
+        existing_operator = self._get_operator_by_symbol(symbol)
+
+        if existing_operator:
+            existing_operator['method'] = method
+            return
+
+        self.operators.append({'symbol': symbol, 'method': method})
+
+    def _remove_operator(self, symbol):
+        """ Remove an operator from operator list based on symbol
+        """
+        operator = self._get_operator_by_symbol(symbol)
+
+        if operator:
+            self.operators.remove(operator)
+
+    def _get_order_of_operations_symbols(self):
+        """ Return order of operations as a list of operand symbols
+        """
+
+        return [operator['symbol'] for operator in self.operators]
+
+    def _set_order_of_operations(self, order):
+        """ Set order of operations
+            Takes: list of symbols that represents order of operations
+        """
+        if sorted(order) != sorted(self._get_order_of_operations_symbols()):
+            raise ValueError('symbol mismatch between provided order and existing list')
+
+        self.operators = sorted(self.operators,
+                                key=lambda operator: order.index(
+                                    operator['symbol']))

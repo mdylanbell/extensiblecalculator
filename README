@@ -1,12 +1,14 @@
-extensible_calculator is a simple python class that allows you to 
+extensiblecalculator is a simple python class that allows you to 
 perform calculations on integers. It is written to be extensible
-so that you can specify new operands besides the default few
-provided here.
+so that you can specify new operators besides the basics
+(*, /, +, -) provided here.
 
-Results are returned as a list of ints, even if only one
-expression is calculated.
+Result is returned as an int.
 
-Example:
+To extend this module, you can create subclasses and define your own operators.
+See MoreFunctionaCalculator.py for subclass example.
+
+Code example:
 
 from Calculator import Calculator
 
@@ -15,10 +17,4 @@ c = Calculator()
 # Simple addition
 c.calculate('3 + 5')
 
-[8]
-
-# Multiple expressions, separated via comma
-c.calculate('3 + 5 * 12, 4 / 2 * 25')
-
-[63, 50]
-
+8
