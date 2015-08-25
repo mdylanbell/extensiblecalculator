@@ -6,6 +6,8 @@ from Calculator import Calculator
 
 
 class MoreFunctionalCalculator(Calculator):
+    """ Extend Calculator by adding modulus and exponent operators
+    """
 
     def __init__(self):
         # Add some more operators
@@ -23,7 +25,7 @@ class MoreFunctionalCalculator(Calculator):
         for operator in operators:
             self._add_operator(operator['symbol'], operator['method'])
 
-        self._set_order_of_operations(['^', '*', '/', '%', '+', '-'])
+        self._set_order_of_operations(['^', '*/%', '+-'])
 
     def modulus(self, a, b):
         """ Calculates simple modulus result (a % b)

@@ -9,24 +9,26 @@ class Calculator(object):
     """
 
     operators = []
+    order_of_operations = []
 
     def calculate(self, expression):
         """ Perform calculation (not worrying about parentheses) on expression
             of arbitrary length, respecting order of operations
         """
 
-        for operator in self._get_order_of_operations_symbols():
+        for operators in self.order_of_operations:
             # Look for 2 numbers sepearated by our operator,
             # capture the numbers (operands) before and after
             # operator
-            regex = r'(\d+)\s*' + re.escape(operator) + r'\s*(\d+)'
+            regex = r'(\d+)\s*([' + re.escape(operators) + r'])\s*(\d+)'
 
             match = re.search(regex, expression)
 
             while match:
 
                 operand_a = int(match.group(1))
-                operand_b = int(match.group(2))
+                operand_b = int(match.group(3))
+                operator = match.group(2)
 
                 value = self._operate(operator, operand_a, operand_b)
 
@@ -82,6 +84,8 @@ class Calculator(object):
         for operator in operators:
             self._add_operator(operator['symbol'], operator['method'])
 
+        self.order_of_operations = ['*/', '+-']
+
     def _operate(self, symbol, operand_a, operand_b):
         """ Perform single calculation based on an operator, and 2 operands
         """
@@ -123,19 +127,13 @@ class Calculator(object):
         if operator:
             self.operators.remove(operator)
 
-    def _get_order_of_operations_symbols(self):
-        """ Return order of operations as a list of operand symbols
-        """
-
-        return [operator['symbol'] for operator in self.operators]
-
     def _set_order_of_operations(self, order):
         """ Set order of operations
             Takes: list of symbols that represents order of operations
         """
-        if sorted(order) != sorted(self._get_order_of_operations_symbols()):
-            raise ValueError('symbol mismatch between provided order and existing list')
+        if sorted(''.join(order)) != \
+           sorted(''.join([x['symbol'] for x in self.operators])):
+            raise ValueError('symbol mismatch between provided order and '
+                             + 'existing list')
 
-        self.operators = sorted(self.operators,
-                                key=lambda operator: order.index(
-                                    operator['symbol']))
+        self.order_of_operations = order

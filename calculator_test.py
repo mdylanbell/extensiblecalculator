@@ -42,6 +42,12 @@ class CalculatorTests(unittest.TestCase):
             c.calculate('2 + 5 * 10')
         )
 
+    def test_order_of_operations_complex(self):
+        self.assertEqual(
+            8,
+            c.calculate('6 - 2 + 4')
+        )
+
     # Test MoreFunctionalCalculator
 
     def test_mfc_modulus_0(self):
